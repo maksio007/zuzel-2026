@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ty + Ja = Żużel</title>
+    <style>
+        /* --- STYLIZACJA OGÓLNA --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden; 
+        }
+
+        /* --- EKRAN GŁÓWNY --- */
+        #main-screen {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+            transition: opacity 0.5s;
+            position: relative; /* Ważne dla pozycjonowania rosnącego przycisku */
+        }
+
+        /* Styl zdjęcia */
+        #photo {
+            width: 300px; 
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            object-fit: cover;
+        }
+
+        /* Styl głównego napisu */
+        h1 {
+            color: #0000FF; /* Niebieski */
+            font-size: 2.5rem;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            z-index: 15;
+        }
+
+        /* Kontener na przyciski */
+        .buttons-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Wspólny styl przycisków */
+        button {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            outline: none;
+            /* Usunąłem domyślne transform, aby sterować tym w JS */
+        }
+
+        /* Przycisk TAK */
+        #btn-tak {
+            background-color: #28a745; /* Zielony */
+            transition: transform 0.2s ease-out; /* Szybsza animacja przy klikaniu */
+            z-index: 50; /* Zawsze na wierzchu */
+            position: relative;
+        }
+
+        /* Przycisk NIE */
+        #btn-nie {
+            background-color: #dc3545; /* Czerwony */
+            z-index: 10;
+        }
+
+        /* --- EKRAN KOŃCOWY (SERCE) --- */
+        #final-screen {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff; 
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        /* Kształt serca w CSS */
+        .heart {
+            background-color: red;
+            display: inline-block;
+            height: 50px;
+            margin: 0 10px;
+            position: relative;
+            top: 0;
+            transform: rotate(-45deg) scale(10); 
+            width: 50px;
+            animation: pulse 1.2s infinite; 
+        }
+
+        .heart:before,
+        .heart:after {
+            content: "";
+            background-color: red;
+            border-radius: 50%;
+            height: 50px;
+            position: absolute;
+            width: 50px;
+        }
+
+        .heart:before {
+            top: -25px;
+            left: 0;
+        }
+
+        .heart:after {
+            left: 25px;
+            top: 0;
+        }
+
+        .heart-text {
+            position: absolute;
+            color: black;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            z-index: 101; 
+            background: rgba(255, 255, 255, 0.7); 
+            padding: 10px 20px;
+            border-radius: 10px;
+            white-space: nowrap; /* Zapobiega łamaniu numeru */
+        }
+
+        @keyframes pulse {
+            0% { transform: rotate(-45deg) scale(10); }
+            50% { transform: rotate(-45deg) scale(11); } 
+            100% { transform: rotate(-45deg) scale(10); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="main-screen">
+        <img id="photo" src="zuzel.jpg" alt="zdjęcie">
+        
+        <h1>Ty + Ja = Żużel (10.04.2026)</h1>
+        
+        <div class="buttons-container">
+            <button id="btn-tak">TAK</button>
+            <button id="btn-nie">NIE</button>
+        </div>
+    </div>
+
+    <div id="final-screen">
+        <div class="heart"></div>
+        <div class="heart-text">Antek – 690 533 211</div>
+    </div>
+
+    <script>
+        const btnTak = document.getElementById('btn-tak');
+        const btnNie = document.getElementById('btn-nie');
+        const mainScreen = document.getElementById('main-screen');
+        const finalScreen = document.getElementById('final-screen');
+
+        // Zmienna przechowująca aktualną wielkość (1 = 100%)
+        let currentScale = 1;
+
+        // Przycisk NIE - nic nie robi
+        btnNie.addEventListener('click', () => {
+            console.log('Kliknięto NIE');
+        });
+
+        // Przycisk TAK - rośnie co kliknięcie
+        btnTak.addEventListener('click', () => {
+            // Zwiększamy skalę o 1 (czyli o kolejne 100% rozmiaru bazowego)
+            // Możesz zmienić to np. na 0.5, jeśli chcesz więcej kliknięć
+            currentScale += 1.5; 
+
+            // Aplikujemy nową wielkość
+            btnTak.style.transform = `scale(${currentScale})`;
+
+            // Sprawdzamy, czy osiągnęliśmy 1000% (czyli scale >= 10)
+            if (currentScale >= 10) {
+                // Krótkie opóźnienie, żeby użytkownik zobaczył ostatnie powiększenie
+                setTimeout(() => {
+                    mainScreen.style.display = 'none';
+                    finalScreen.style.display = 'flex';
+                }, 300); // 300ms czekania po ostatnim kliknięciu
+            }
+        });
+    </script>
+
+</body>
+</html>
