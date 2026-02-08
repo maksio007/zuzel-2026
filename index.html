@@ -27,10 +27,9 @@
             gap: 20px;
             z-index: 10;
             transition: opacity 0.5s;
-            position: relative; /* Ważne dla pozycjonowania rosnącego przycisku */
+            position: relative;
         }
 
-        /* Styl zdjęcia */
         #photo {
             width: 300px; 
             height: auto;
@@ -39,16 +38,14 @@
             object-fit: cover;
         }
 
-        /* Styl głównego napisu */
         h1 {
-            color: #0000FF; /* Niebieski */
+            color: #0000FF;
             font-size: 2.5rem;
             margin: 10px 0;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             z-index: 15;
         }
 
-        /* Kontener na przyciski */
         .buttons-container {
             display: flex;
             gap: 30px;
@@ -57,7 +54,6 @@
             z-index: 20;
         }
 
-        /* Wspólny styl przycisków */
         button {
             padding: 15px 40px;
             font-size: 1.5rem;
@@ -67,24 +63,21 @@
             color: white;
             font-weight: bold;
             outline: none;
-            /* Usunąłem domyślne transform, aby sterować tym w JS */
         }
 
-        /* Przycisk TAK */
         #btn-tak {
-            background-color: #28a745; /* Zielony */
-            transition: transform 0.2s ease-out; /* Szybsza animacja przy klikaniu */
-            z-index: 50; /* Zawsze na wierzchu */
+            background-color: #28a745;
+            transition: transform 0.2s ease-out;
+            z-index: 50;
             position: relative;
         }
 
-        /* Przycisk NIE */
         #btn-nie {
-            background-color: #dc3545; /* Czerwony */
+            background-color: #dc3545;
             z-index: 10;
         }
 
-        /* --- EKRAN KOŃCOWY (SERCE) --- */
+        /* --- EKRAN KOŃCOWY (FAJERWERKI) --- */
         #final-screen {
             display: none; 
             position: fixed;
@@ -92,62 +85,35 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #fff; 
+            background-color: #000; /* Czarne tło dla fajerwerków */
             justify-content: center;
             align-items: center;
             flex-direction: column;
             z-index: 100;
+            overflow: hidden;
         }
 
-        /* Kształt serca w CSS */
-        .heart {
-            background-color: red;
-            display: inline-block;
-            height: 50px;
-            margin: 0 10px;
-            position: relative;
-            top: 0;
-            transform: rotate(-45deg) scale(5); 
-            width: 50px;
-            animation: pulse 1.2s infinite; 
-        }
-
-        .heart:before,
-        .heart:after {
-            content: "";
-            background-color: red;
-            border-radius: 50%;
-            height: 50px;
-            position: absolute;
-            width: 50px;
-        }
-
-        .heart:before {
-            top: -25px;
-            left: 0;
-        }
-
-        .heart:after {
-            left: 25px;
-            top: 0;
-        }
-
-        .heart-text {
-            position: absolute;
-            color: black;
-            font-size: 2rem;
+        .final-text {
+            color: white;
+            font-size: 2.5rem;
             font-weight: bold;
             text-align: center;
-            z-index: 101;  
-            padding: 10px 20px;
-            border-radius: 10px;
-            white-space: nowrap; /* Zapobiega łamaniu numeru */
+            z-index: 110;
+            text-shadow: 0 0 15px rgba(255,255,255,0.8);
         }
 
-        @keyframes pulse {
-            0% { transform: rotate(-45deg) scale(5); }
-            50% { transform: rotate(-45deg) scale(5.6); } 
-            100% { transform: rotate(-45deg) scale(5); }
+        /* Styl pojedynczego fajerwerku */
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: explode 2s infinite ease-out;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
         }
 
     </style>
@@ -166,8 +132,7 @@
     </div>
 
     <div id="final-screen">
-        <div class="heart"></div>
-        <div class="heart-text">Antek – 690 533 211</div>
+        <div class="final-text">Napisz do mnie na ig<br>@antoni.rumun</div>
     </div>
 
     <script>
@@ -176,35 +141,52 @@
         const mainScreen = document.getElementById('main-screen');
         const finalScreen = document.getElementById('final-screen');
 
-        // Zmienna przechowująca aktualną wielkość (1 = 100%)
         let currentScale = 1;
 
-        // Przycisk NIE - nic nie robi
+        // Przycisk NIE - teraz pokazuje komunikat
         btnNie.addEventListener('click', () => {
-            console.log('Kliknięto NIE');
+            alert("Zła odpowiedź! Spróbuj jeszcze raz... ❤️");
         });
 
         // Przycisk TAK - rośnie co kliknięcie
         btnTak.addEventListener('click', () => {
-            // Zwiększamy skalę o 1 (czyli o kolejne 100% rozmiaru bazowego)
-            // Możesz zmienić to np. na 0.5, jeśli chcesz więcej kliknięć
             currentScale += 1.5; 
-
-            // Aplikujemy nową wielkość
             btnTak.style.transform = `scale(${currentScale})`;
 
-            // Sprawdzamy, czy osiągnęliśmy 1000% (czyli scale >= 10)
             if (currentScale >= 10) {
-                // Krótkie opóźnienie, żeby użytkownik zobaczył ostatnie powiększenie
                 setTimeout(() => {
                     mainScreen.style.display = 'none';
                     finalScreen.style.display = 'flex';
-                }, 300); // 300ms czekania po ostatnim kliknięciu
+                    createFireworks(); // Funkcja tworząca fajerwerki
+                }, 300);
             }
         });
+
+        // Funkcja generująca fajerwerki
+        function createFireworks() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ffffff'];
+            for (let i = 0; i < 60; i++) {
+                const fw = document.createElement('div');
+                fw.className = 'firework';
+                
+                // Losowy kolor
+                fw.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Losowy kierunek wybuchu (kąt i dystans)
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 400 + 100;
+                
+                // Ustawienie zmiennych dla animacji CSS
+                fw.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                fw.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+                
+                // Losowe opóźnienie, żeby nie wszystkie naraz
+                fw.style.animationDelay = Math.random() * 2 + 's';
+                
+                finalScreen.appendChild(fw);
+            }
+        }
     </script>
 
 </body>
 </html>
-
-
